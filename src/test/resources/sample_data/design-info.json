@@ -1,0 +1,13 @@
+{
+  "sampleData": {
+    "50fd7d06-9b30-4e0f-bb1e-74c6a242204f": {
+      "payload": "sample_data/list_list_json.json"
+    },
+    "bec287ba-9d0b-4ff4-996b-0f7b4b758e54": {
+      "payload": "sample_data/colors.xml"
+    },
+    "98047ae1-735e-4b1c-878b-eff1d9324214": {
+      "payload": "sample_data/defaultstringtype.dwl"
+    }
+  }
+}

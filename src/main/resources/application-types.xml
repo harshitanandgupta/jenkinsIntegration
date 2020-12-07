@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="samplejson" format="json">
+      <types:shape format="weave" example="examples/samples.json"><![CDATA[%dw 2.0
+
+type samplejson = Array<{|  color: String,   value: String|}> {"example": "[{\\\"color\\\":\\\"red\\\",\\\"value\\\":\\\"#f00\\\"},{\\\"color\\\":\\\"green\\\",\\\"value\\\":\\\"#0f0\\\"},{\\\"color\\\":\\\"blue\\\",\\\"value\\\":\\\"#00f\\\"},{\\\"color\\\":\\\"cyan\\\",\\\"value\\\":\\\"#0ff\\\"},{\\\"color\\\":\\\"magenta\\\",\\\"value\\\":\\\"#f0f\\\"},{\\\"color\\\":\\\"yellow\\\",\\\"value\\\":\\\"#ff0\\\"},{\\\"color\\\":\\\"black\\\",\\\"value\\\":\\\"#000\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="samplexml" format="xml">
+      <types:example format="xml" element="colors" location="examples/samplexml.xml"/>
+    </types:type>
+    <types:type name="sampless" format="xml">
+      <types:example format="xml" element="colors" location="examples/samplexml-1.xml"/>
+    </types:type>
+    <types:type name="date" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#50fd7d06-9b30-4e0f-bb1e-74c6a242204f">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="samplejson"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:variables>
+          <types:variable name="xmldata" type="sampless"/>
+        </types:variables>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#bec287ba-9d0b-4ff4-996b-0f7b4b758e54">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="sampless"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#98047ae1-735e-4b1c-878b-eff1d9324214">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="date"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

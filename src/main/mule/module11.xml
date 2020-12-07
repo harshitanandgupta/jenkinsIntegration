@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="99df5f35-1079-49e0-acca-098dad9ac894" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="module11Flow" doc:id="78ab9ea2-8f56-4a89-93d7-b573fc36bf60" >
+		<http:listener doc:name="Listener" doc:id="324b8df4-1c9c-49bb-9ecd-82c733d98e22" config-ref="HTTP_Listener_config" path="/transform"/>
+		<ee:transform doc:name="Transform Message" doc:id="50fd7d06-9b30-4e0f-bb1e-74c6a242204f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload..color]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="xmldata" ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	colors: {
+		(payload map ( payload01 , indexOfPayload01 ) -> {
+			color: {
+				"type": payload01.color,
+				value: payload01.value
+			}
+		})
+	}
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="23eafbdd-064f-470e-a32e-84ec0a4cd36b" message="#[vars.xmldata]"/>
+	</flow>
+	<flow name="module11Flow1" doc:id="32ca989c-8178-485a-926d-b5f6cc08b8a3" >
+		<http:listener doc:name="Listener" doc:id="b93bdbc0-d0f2-429a-af24-81cf80ae0858" config-ref="HTTP_Listener_config" path="/xmlconversion"/>
+		<ee:transform doc:name="Transform Message" doc:id="bec287ba-9d0b-4ff4-996b-0f7b4b758e54" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	colors : payload.colors
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="module11Flow2" doc:id="5d089520-6f91-4158-94ca-41698c3eb223" >
+		<http:listener doc:name="Listener" doc:id="ccc166b9-267f-4098-abd0-72063654209d" config-ref="HTTP_Listener_config" path="/convertdate"/>
+		<ee:transform doc:name="Transform Message" doc:id="98047ae1-735e-4b1c-878b-eff1d9324214" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+import * from dw::core::Strings
+var name="small alpha"
+---
+payload as Date{format : 'dd-MM-yyyy'} as String {format:'dd-MM-yyyy'} as String {format : 'N'}
+++
+upper(dasherize(upper(name)))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="69a0bf71-d3f5-44f4-9188-174bf66140a2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+lookup('module11Flow3',{"sample":"data"})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="module11Flow4" doc:id="0a06ad71-ee04-4f05-82a9-2adee1bf5ee8" >
+		<http:listener doc:name="Listener" doc:id="e32f24f6-fb08-4715-a03f-98bf38ae7b93" config-ref="HTTP_Listener_config" path="/tryreq" allowedMethods="GET"/>
+		<try doc:name="Try" doc:id="46c6baa6-f221-40fe-8224-0ed1f2d60f24" >
+			<validation:is-null doc:name="Is null" doc:id="0355a8d9-c717-4f6f-add9-3faa1023153e" value="#[payload]"/>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="0918de38-cf65-44bf-9f25-910a0a954590" >
+					<set-payload value='"Error Try Scope"' doc:name="Set Payload" doc:id="01822b9d-a699-40c3-99c0-feb133e2f540" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<set-payload value='"Success Main Flow"' doc:name="Set Payload" doc:id="f03f9c40-fb4f-4227-90b2-d816f340c3ba" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="bcd6fa7d-1a57-4104-879f-01d989862f49" >
+				<set-payload value='"Error Main Flow"' doc:name="Set Payload" doc:id="5a4f8514-d14d-4cad-8a1e-e1fbb3524166" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="module11Flow3" doc:id="2768e8a7-ab7f-4708-a356-94246894e2e9" >
+		<set-payload value='#[output application/json
+---
+{
+	"forwaded" : payload,
+	"added" : {
+		"add" : "json"
+	}
+}]' doc:name="Set Payload" doc:id="6aa48b9d-1f56-415c-993f-ebbeb937f2a3" />
+	</flow>
+</mule>
